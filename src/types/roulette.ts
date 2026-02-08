@@ -10,3 +10,16 @@ export type TodayRouletteRes = {
 export type UpdateTodayBudgetReq = {
   newTotalBudget: number
 }
+
+export type FutureBudgetItem = {
+  id: number
+  settingDate: string
+  totalBudget: number
+  createdAt: string
+  modifiedAt: string
+}
+
+export type UpdateFutureBudgetReq = {
+  targetDate: string
+  newTotalBudget: number
+}

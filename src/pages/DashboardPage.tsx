@@ -9,9 +9,16 @@ import type { TodayRouletteRes } from '@/types/roulette'
 type DashboardPageProps = {
   session: AdminSession
   onLogout: () => void
+  onGoBudget: () => void
+  onGoHistory: () => void
 }
 
-export default function DashboardPage({ session, onLogout }: DashboardPageProps) {
+export default function DashboardPage({
+  session,
+  onLogout,
+  onGoBudget,
+  onGoHistory,
+}: DashboardPageProps) {
   const [today, setToday] = useState<TodayRouletteRes | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -53,8 +60,11 @@ export default function DashboardPage({ session, onLogout }: DashboardPageProps)
           <p className="text-sm text-slate-500">{session.nickname}님, 오늘 현황입니다.</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
+        <div className="grid grid-cols-4 gap-2">
+          <Button
+            className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
+            onClick={onGoBudget}
+          >
             예산관리
           </Button>
           <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
@@ -62,6 +72,12 @@ export default function DashboardPage({ session, onLogout }: DashboardPageProps)
           </Button>
           <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
             주문내역
+          </Button>
+          <Button
+            className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
+            onClick={onGoHistory}
+          >
+            역대 룰렛
           </Button>
         </div>
 
@@ -78,38 +94,24 @@ export default function DashboardPage({ session, onLogout }: DashboardPageProps)
         )}
 
         <div className="grid grid-cols-2 gap-3 text-sm">
-          {[
-            {
-              label: '오늘 예산',
-              value: today ? formatCurrency(today.totalBudget) : '-',
-              editable: true,
-            },
-            {
-              label: '참여자 수',
-              value: today ? today.participantCount.toLocaleString('ko-KR') : '-',
-            },
-            {
-              label: '지급 포인트',
-              value: today ? today.usedBudget.toLocaleString('ko-KR') : '-',
-            },
-            {
-              label: '사용 예산',
-              value: today ? formatCurrency(today.usedBudget) : '-',
-            },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-lg border border-black/10 bg-sky-50 px-3 py-3"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs text-slate-400">{stat.label}</p>
-                  <p className="mt-1 text-base font-semibold text-slate-900">{stat.value}</p>
-                </div>
-                {stat.editable ? null : null}
-              </div>
-            </div>
-          ))}
+          <div className="col-span-2 rounded-lg border border-black/10 bg-sky-50 px-3 py-3">
+            <p className="text-xs text-slate-400">오늘 예산</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {today ? formatCurrency(today.totalBudget) : '-'}
+            </p>
+          </div>
+          <div className="rounded-lg border border-black/10 bg-sky-50 px-3 py-3">
+            <p className="text-xs text-slate-400">지급 포인트</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {today ? today.usedBudget.toLocaleString('ko-KR') : '-'}
+            </p>
+          </div>
+          <div className="rounded-lg border border-black/10 bg-sky-50 px-3 py-3">
+            <p className="text-xs text-slate-400">참여자 수</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {today ? today.participantCount.toLocaleString('ko-KR') : '-'}
+            </p>
+          </div>
         </div>
 
         <Button

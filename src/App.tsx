@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
+import BudgetPage from '@/pages/BudgetPage'
+import RouletteHistoryPage from '@/pages/RouletteHistoryPage'
 import type { AdminSession } from '@/types/session'
 
 function App() {
   const [session, setSession] = useState<AdminSession | null>(null)
+  const [route, setRoute] = useState<'dashboard' | 'budget' | 'history'>('dashboard')
 
   useEffect(() => {
     const rawSession = localStorage.getItem('adminSession')
@@ -33,7 +36,21 @@ function App() {
     return <LoginPage onSuccess={handleLoginSuccess} />
   }
 
-  return <DashboardPage session={session} onLogout={handleLogout} />
+  if (route === 'budget') {
+    return <BudgetPage onBack={() => setRoute('dashboard')} />
+  }
+  if (route === 'history') {
+    return <RouletteHistoryPage onBack={() => setRoute('dashboard')} />
+  }
+
+  return (
+    <DashboardPage
+      session={session}
+      onLogout={handleLogout}
+      onGoBudget={() => setRoute('budget')}
+      onGoHistory={() => setRoute('history')}
+    />
+  )
 }
 
 export default App
