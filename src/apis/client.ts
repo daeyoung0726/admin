@@ -19,11 +19,26 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     throw new Error('VITE_API_BASE_URL is not set')
   }
 
+  const headers = new Headers(options?.headers)
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  if (!path.includes('/api/v1/admin/auth/sign-in')) {
+    const rawSession = localStorage.getItem('adminSession')
+    if (rawSession) {
+      try {
+        const session = JSON.parse(rawSession) as { id?: number }
+        if (typeof session?.id === 'number') {
+          headers.set('X-User-Id', String(session.id))
+        }
+      } catch {
+      }
+    }
+  }
+
   const response = await fetch(`${baseUrl}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options?.headers ?? {}),
-    },
+    headers,
     ...options,
   })
 

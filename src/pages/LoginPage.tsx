@@ -70,7 +70,9 @@ export default function LoginPage({ onSuccess }: LoginPageProps) {
           <Button
             type="submit"
             disabled={loading}
-            className="h-14 w-full rounded-xl bg-[#1F5BFF] text-[16px] font-semibold text-white shadow-sm hover:bg-[#1A4AE0] active:bg-[#173FC6]"
+            className="h-14 w-full rounded-xl 
+              bg-[#4C9AFF] text-[16px] font-semibold text-white shadow-sm 
+              hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
           >
             {loading ? "로그인 중..." : "로그인"}
           </Button>
