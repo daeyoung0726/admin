@@ -12,9 +12,10 @@ const MAX_PAGE_BUTTONS = 5
 
 type RouletteHistoryProps = {
   onBack: () => void
+  onSelectDate: (rouletteDate: string) => void
 }
 
-export default function RouletteHistoryPage({ onBack }: RouletteHistoryProps) {
+export default function RouletteHistoryPage({ onBack, onSelectDate }: RouletteHistoryProps) {
   const [page, setPage] = useState(0)
   const [data, setData] = useState<RouletteHistoryPage | null>(null)
   const [loading, setLoading] = useState(true)
@@ -37,6 +38,7 @@ export default function RouletteHistoryPage({ onBack }: RouletteHistoryProps) {
     }
     fetchData()
   }, [page])
+
 
   const items = data?.content ?? []
   const pageInfo = data?.page
@@ -116,7 +118,12 @@ export default function RouletteHistoryPage({ onBack }: RouletteHistoryProps) {
             }
 
             return (
-              <div key={item.id} className={`${card} p-6`}>
+              <button
+                key={item.id}
+                type="button"
+                className={`${card} w-full p-6 text-left transition-transform hover:-translate-y-0.5`}
+                onClick={() => onSelectDate(item.rouletteDate)}
+              >
                 {/* 상단 */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5">
@@ -163,7 +170,7 @@ export default function RouletteHistoryPage({ onBack }: RouletteHistoryProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>
@@ -248,6 +255,7 @@ export default function RouletteHistoryPage({ onBack }: RouletteHistoryProps) {
           대시보드로 돌아가기
         </Button>
       </div>
+
     </CenteredCardLayout>
   )
 }
