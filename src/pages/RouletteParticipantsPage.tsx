@@ -2,17 +2,26 @@ import { useEffect, useState } from 'react'
 import CenteredCardLayout from '@/components/CenteredCardLayout'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/apis/client'
-import { getPointRecordsByRouletteDate, reclaimPoint } from '@/apis/points'
+import { getPointRecordsByRouletteDate, getPointRecordsByUserId, reclaimPoint } from '@/apis/points'
 import type { PointRecordPage } from '@/types/points'
 
 const DEFAULT_SIZE = 10
 
-type RouletteParticipantsProps = {
-  rouletteDate: string
-  onBack: () => void
-}
+type RouletteParticipantsProps =
+  | {
+      rouletteDate: string
+      onBack: () => void
+    }
+  | {
+      userId: number
+      onBack: () => void
+    }
 
-export default function RouletteParticipantsPage({ rouletteDate, onBack }: RouletteParticipantsProps) {
+export default function RouletteParticipantsPage(props: RouletteParticipantsProps) {
+  const isUserMode = 'userId' in props
+  const rouletteDate = 'rouletteDate' in props ? props.rouletteDate : null
+  const userId = 'userId' in props ? props.userId : null
+  const onBack = props.onBack
   const [page, setPage] = useState(0)
   const [data, setData] = useState<PointRecordPage | null>(null)
   const [loading, setLoading] = useState(true)
@@ -24,7 +33,9 @@ export default function RouletteParticipantsPage({ rouletteDate, onBack }: Roule
       try {
         setLoading(true)
         setErrorMessage(null)
-        const result = await getPointRecordsByRouletteDate(rouletteDate, page, DEFAULT_SIZE)
+        const result = isUserMode
+          ? await getPointRecordsByUserId(userId as number, page, DEFAULT_SIZE)
+          : await getPointRecordsByRouletteDate(rouletteDate as string, page, DEFAULT_SIZE)
         setData(result)
       } catch (error) {
         if (error instanceof ApiError) setErrorMessage(error.message)
@@ -36,10 +47,12 @@ export default function RouletteParticipantsPage({ rouletteDate, onBack }: Roule
     }
 
     fetchData()
-  }, [rouletteDate, page])
+  }, [rouletteDate, userId, page, isUserMode])
 
   const refresh = async () => {
-    const result = await getPointRecordsByRouletteDate(rouletteDate, page, DEFAULT_SIZE)
+    const result = isUserMode
+      ? await getPointRecordsByUserId(userId as number, page, DEFAULT_SIZE)
+      : await getPointRecordsByRouletteDate(rouletteDate as string, page, DEFAULT_SIZE)
     setData(result)
   }
 
@@ -75,8 +88,12 @@ export default function RouletteParticipantsPage({ rouletteDate, onBack }: Roule
         </Button>
         
         <div className="space-y-2 text-center">
-          <h1 className="text-xl font-semibold text-slate-900">참여 사용자</h1>
-          <p className="text-sm text-slate-500">{rouletteDate}</p>
+          <h1 className="text-xl font-semibold text-slate-900">
+            {isUserMode ? '획득 포인트' : '참여 사용자'}
+          </h1>
+          <p className="text-sm text-slate-500">
+            {isUserMode ? `사용자 #${userId}` : rouletteDate}
+          </p>
         </div>
 
         {loading && (
@@ -109,36 +126,45 @@ export default function RouletteParticipantsPage({ rouletteDate, onBack }: Roule
                   {reclaimingId === record.id ? '회수 중...' : '포인트 회수'}
                 </Button>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-slate-600">
-                <div>
-                  <p className="text-[10px] text-slate-400">지급 포인트</p>
-                  <p className="font-semibold text-slate-900">
-                    {record.grantedPoint.toLocaleString('ko-KR')}
-                  </p>
+              <div className="mt-3 space-y-3 text-xs text-slate-600">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] text-slate-400">지급 포인트</p>
+                    <p className="font-semibold text-slate-900">
+                      {record.grantedPoint.toLocaleString('ko-KR')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400">잔여 포인트</p>
+                    <p className="font-semibold text-slate-900">
+                      {record.remainingPoint.toLocaleString('ko-KR')}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] text-slate-400">잔여 포인트</p>
-                  <p className="font-semibold text-slate-900">
-                    {record.remainingPoint.toLocaleString('ko-KR')}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400">만료일</p>
-                  <p className="font-semibold text-slate-900">{record.expiresAt}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400">포인트 상태</p>
-                  <p className="font-semibold text-slate-900">
-                    {record.status === 'AVAILABLE'
-                      ? '사용 중'
-                      : record.status === 'USED'
-                        ? '소진'
-                        : record.status === 'EXPIRED'
-                          ? '만료됨'
-                          : record.status === 'CANCELED'
-                            ? '취소됨'
-                            : record.status}
-                  </p>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <p className="text-[10px] text-slate-400">룰렛 날짜</p>
+                    <p className="font-semibold text-slate-900">{record.rouletteDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400">만료일</p>
+                    <p className="font-semibold text-slate-900">{record.expiresAt}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400">포인트 상태</p>
+                    <p className="font-semibold text-slate-900">
+                      {record.status === 'AVAILABLE'
+                        ? '사용 중'
+                        : record.status === 'USED'
+                          ? '다 씀'
+                          : record.status === 'EXPIRED'
+                            ? '만료됨'
+                            : record.status === 'CANCELED'
+                              ? '취소됨'
+                              : record.status}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -173,7 +199,7 @@ export default function RouletteParticipantsPage({ rouletteDate, onBack }: Roule
           className="h-14 w-full rounded-2xl text-[16px] font-semibold shadow-sm bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
           onClick={onBack}
         >
-          룰렛 목록으로 돌아가기
+          {isUserMode ? '사용자 상세로 돌아가기' : '룰렛 목록으로 돌아가기'}
         </Button>
       </div>
     </CenteredCardLayout>

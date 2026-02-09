@@ -10,16 +10,16 @@ type DashboardPageProps = {
   session: AdminSession
   onLogout: () => void
   onGoBudget: () => void
-  onGoHistory: () => void
   onGoProducts: () => void
+  onGoUsers: () => void
 }
 
 export default function DashboardPage({
   session,
   onLogout,
   onGoBudget,
-  onGoHistory,
   onGoProducts,
+  onGoUsers,
 }: DashboardPageProps) {
   const [today, setToday] = useState<TodayRouletteRes | null>(null)
   const [loading, setLoading] = useState(true)
@@ -62,7 +62,7 @@ export default function DashboardPage({
           <p className="text-sm text-slate-500">{session.nickname}님, 오늘 현황입니다.</p>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
             onClick={onGoBudget}
@@ -75,14 +75,11 @@ export default function DashboardPage({
           >
             상품관리
           </Button>
-          <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
-            사용자관리
-          </Button>
           <Button
             className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
-            onClick={onGoHistory}
+            onClick={onGoUsers}
           >
-            역대 룰렛
+            사용자관리
           </Button>
         </div>
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import CenteredCardLayout from '@/components/CenteredCardLayout'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/apis/client'
-import { getOrdersByProductId } from '@/apis/orders'
+import { getOrdersByProductId, getOrdersByUserId } from '@/apis/orders'
 import type { OrderItem, OrderPage } from '@/types/orders'
 
 const DEFAULT_SIZE = 12
@@ -39,23 +39,27 @@ const formatOrderStatus = (status: string) => {
 }
 
 type OrdersPageProps = {
-  productId: number
+  productId?: number
+  userId?: number
   onBack: () => void
   onSelectOrder: (orderId: number) => void
 }
 
-export default function OrdersPage({ productId, onBack, onSelectOrder }: OrdersPageProps) {
+export default function OrdersPage({ productId, userId, onBack, onSelectOrder }: OrdersPageProps) {
   const [page, setPage] = useState(0)
   const [data, setData] = useState<OrderPage | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const isUserMode = typeof userId === 'number'
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
         setErrorMessage(null)
-        const result = await getOrdersByProductId(productId, page, DEFAULT_SIZE)
+        const result = isUserMode
+          ? await getOrdersByUserId(userId as number, page, DEFAULT_SIZE)
+          : await getOrdersByProductId(productId as number, page, DEFAULT_SIZE)
         setData(result)
       } catch (error) {
         if (error instanceof ApiError) setErrorMessage(error.message)
@@ -65,8 +69,10 @@ export default function OrdersPage({ productId, onBack, onSelectOrder }: OrdersP
         setLoading(false)
       }
     }
+    if (!isUserMode && typeof productId !== 'number') return
+    if (isUserMode && typeof userId !== 'number') return
     fetchData()
-  }, [productId, page])
+  }, [productId, userId, page, isUserMode])
 
   const items = data?.content ?? []
   const pageInfo = data?.page
@@ -113,8 +119,12 @@ export default function OrdersPage({ productId, onBack, onSelectOrder }: OrdersP
         <div className="grid grid-cols-[1fr_auto_1fr] items-center">
           <div />
           <div className="space-y-2 text-center">
-            <h1 className="text-xl font-semibold text-slate-900">상품 주문 내역</h1>
-            <p className="text-sm text-slate-500">상품 주문 기록을 확인합니다.</p>
+            <h1 className="text-xl font-semibold text-slate-900">
+              {isUserMode ? '사용자 주문 내역' : '상품 주문 내역'}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {isUserMode ? '사용자 주문 기록을 확인합니다.' : '상품 주문 기록을 확인합니다.'}
+            </p>
           </div>
           <div />
         </div>
@@ -266,7 +276,7 @@ export default function OrdersPage({ productId, onBack, onSelectOrder }: OrdersP
           className={`h-14 w-full rounded-2xl text-[16px] font-semibold shadow-sm ${primaryBtn}`}
           onClick={onBack}
         >
-          상품 상세로 돌아가기
+          {isUserMode ? '사용자 상세로 돌아가기' : '상품 상세로 돌아가기'}
         </Button>
       </div>
     </CenteredCardLayout>

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import CenteredCardLayout from '@/components/CenteredCardLayout'
 import { Button } from '@/components/ui/button'
-import { ApiError, apiFetch } from '@/apis/client'
-import { cancelOrder } from '@/apis/orders'
-import type { ApiResponse } from '@/types/api'
+import { ApiError } from '@/apis/client'
+import { cancelOrder, getOrderById } from '@/apis/orders'
 import type { OrderDetail } from '@/types/orders'
 
 const formatCurrency = (value: number) =>
@@ -50,8 +49,8 @@ export default function OrderDetailPage({ orderId, onBack }: OrderDetailProps) {
       try {
         setLoading(true)
         setErrorMessage(null)
-        const result = await apiFetch<ApiResponse<OrderDetail>>(`/api/v1/admin/orders/${orderId}`)
-        setOrder(result.data)
+        const result = await getOrderById(orderId)
+        setOrder(result)
       } catch (error) {
         if (error instanceof ApiError) setErrorMessage(error.message)
         else if (error instanceof Error) setErrorMessage(error.message)
@@ -69,8 +68,8 @@ export default function OrderDetailPage({ orderId, onBack }: OrderDetailProps) {
     try {
       setCanceling(true)
       await cancelOrder(orderId)
-      const result = await apiFetch<ApiResponse<OrderDetail>>(`/api/v1/admin/orders/${orderId}`)
-      setOrder(result.data)
+      const result = await getOrderById(orderId)
+      setOrder(result)
     } catch (error) {
       if (error instanceof ApiError) setErrorMessage(error.message)
       else if (error instanceof Error) setErrorMessage(error.message)

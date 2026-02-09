@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import BudgetPage from '@/pages/BudgetPage'
+import BudgetEditPage from '@/pages/BudgetEditPage'
 import RouletteHistoryPage from '@/pages/RouletteHistoryPage'
 import RouletteParticipantsPage from '@/pages/RouletteParticipantsPage'
 import ProductsPage from '@/pages/ProductsPage'
@@ -11,6 +12,8 @@ import ProductEditPage from '@/pages/ProductEditPage'
 import ProductStockPage from '@/pages/ProductStockPage'
 import OrdersPage from '@/pages/OrdersPage'
 import OrderDetailPage from '@/pages/OrderDetailPage'
+import UsersPage from '@/pages/UsersPage'
+import UserDetailPage from '@/pages/UserDetailPage'
 import type { AdminSession } from '@/types/session'
 
 function App() {
@@ -18,6 +21,7 @@ function App() {
   const [route, setRoute] = useState<
     | 'dashboard'
     | 'budget'
+    | 'budget-edit'
     | 'history'
     | 'participants'
     | 'products'
@@ -27,12 +31,20 @@ function App() {
     | 'product-stock'
     | 'product-orders'
     | 'order-detail'
+    | 'users'
+    | 'user-detail'
+    | 'user-orders'
+    | 'user-points'
   >(
     'dashboard',
   )
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
   const [selectedRouletteDate, setSelectedRouletteDate] = useState<string | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
+  const [orderBackRoute, setOrderBackRoute] = useState<'product-orders' | 'user-orders'>(
+    'product-orders',
+  )
 
   useEffect(() => {
     const rawSession = localStorage.getItem('adminSession')
@@ -62,7 +74,16 @@ function App() {
   }
 
   if (route === 'budget') {
-    return <BudgetPage onBack={() => setRoute('dashboard')} />
+    return (
+      <BudgetPage
+        onBack={() => setRoute('dashboard')}
+        onGoEdit={() => setRoute('budget-edit')}
+        onGoHistory={() => setRoute('history')}
+      />
+    )
+  }
+  if (route === 'budget-edit') {
+    return <BudgetEditPage onBack={() => setRoute('budget')} />
   }
   if (route === 'history') {
     return (
@@ -80,6 +101,14 @@ function App() {
       <RouletteParticipantsPage
         rouletteDate={selectedRouletteDate}
         onBack={() => setRoute('history')}
+      />
+    )
+  }
+  if (route === 'user-points' && selectedUserId !== null) {
+    return (
+      <RouletteParticipantsPage
+        userId={selectedUserId}
+        onBack={() => setRoute('user-detail')}
       />
     )
   }
@@ -117,13 +146,50 @@ function App() {
         onBack={() => setRoute('product-detail')}
         onSelectOrder={(orderId) => {
           setSelectedOrderId(orderId)
+          setOrderBackRoute('product-orders')
+          setRoute('order-detail')
+        }}
+      />
+    )
+  }
+  if (route === 'user-orders' && selectedUserId !== null) {
+    return (
+      <OrdersPage
+        userId={selectedUserId}
+        onBack={() => setRoute('user-detail')}
+        onSelectOrder={(orderId) => {
+          setSelectedOrderId(orderId)
+          setOrderBackRoute('user-orders')
           setRoute('order-detail')
         }}
       />
     )
   }
   if (route === 'order-detail' && selectedOrderId !== null) {
-    return <OrderDetailPage orderId={selectedOrderId} onBack={() => setRoute('product-orders')} />
+    return (
+      <OrderDetailPage orderId={selectedOrderId} onBack={() => setRoute(orderBackRoute)} />
+    )
+  }
+  if (route === 'users') {
+    return (
+      <UsersPage
+        onBack={() => setRoute('dashboard')}
+        onSelectUser={(userId) => {
+          setSelectedUserId(userId)
+          setRoute('user-detail')
+        }}
+      />
+    )
+  }
+  if (route === 'user-detail' && selectedUserId !== null) {
+    return (
+      <UserDetailPage
+        userId={selectedUserId}
+        onBack={() => setRoute('users')}
+        onOrders={() => setRoute('user-orders')}
+        onPoints={() => setRoute('user-points')}
+      />
+    )
   }
   if (route === 'product-edit' && selectedProductId !== null) {
     return (
@@ -147,8 +213,8 @@ function App() {
       session={session}
       onLogout={handleLogout}
       onGoBudget={() => setRoute('budget')}
-      onGoHistory={() => setRoute('history')}
       onGoProducts={() => setRoute('products')}
+      onGoUsers={() => setRoute('users')}
     />
   )
 }
