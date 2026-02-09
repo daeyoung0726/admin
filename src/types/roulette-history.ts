@@ -17,7 +17,6 @@ export type RouletteHistoryItem = {
   totalBudget: number
   usedBudget: number
   participantCount: number
-  deletedAt: string | null
 }
 
 export type RouletteHistoryPage = {

@@ -11,6 +11,7 @@ type DashboardPageProps = {
   onLogout: () => void
   onGoBudget: () => void
   onGoHistory: () => void
+  onGoProducts: () => void
 }
 
 export default function DashboardPage({
@@ -18,6 +19,7 @@ export default function DashboardPage({
   onLogout,
   onGoBudget,
   onGoHistory,
+  onGoProducts,
 }: DashboardPageProps) {
   const [today, setToday] = useState<TodayRouletteRes | null>(null)
   const [loading, setLoading] = useState(true)
@@ -67,11 +69,14 @@ export default function DashboardPage({
           >
             예산관리
           </Button>
-          <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
+          <Button
+            className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"
+            onClick={onGoProducts}
+          >
             상품관리
           </Button>
           <Button className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]">
-            주문내역
+            사용자관리
           </Button>
           <Button
             className="h-14 bg-[#4C9AFF] text-white hover:bg-[#3A8BFF] active:bg-[#2A7EFF]"

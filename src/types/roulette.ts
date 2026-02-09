@@ -4,7 +4,6 @@ export type TodayRouletteRes = {
   totalBudget: number
   usedBudget: number
   participantCount: number
-  deletedAt: string | null
 }
 
 export type UpdateTodayBudgetReq = {

@@ -9,7 +9,6 @@ export type PointRecord = {
   userId: number
   nickname?: string
   rouletteDate: string
-  deletedAt: string | null
 }
 
 export type PointRecordPage = {
